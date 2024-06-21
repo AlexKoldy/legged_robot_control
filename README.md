@@ -1,3 +1,9 @@
+# Whole Body Control
+<div style="display: flex; align-items: center;">
+    <img src="https://github.com/AlexKoldy/whole_body_control/assets/52255127/f2a7a915-b091-4962-bbbf-5f7d876cc564" height="255" alt="First GIF">
+    <img src="https://github.com/AlexKoldy/whole_body_control/assets/52255127/2e3707d7-5ef1-449d-898c-aee3ed8a8d4b" height="255" alt="Second GIF">
+</div>
+
 ## Footstep Planner
 To achieve high-frequency footstep planning, we can use the Linear Inverted Pendulum Model (LIP), i.e., a point mass, approximating the robot's center of mass (CoM), attached to a massless prismatic actuator. The acceleration of the point mass is given in [this paper](https://ieeexplore.ieee.org/document/6907116):
 
