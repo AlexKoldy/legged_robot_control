@@ -64,3 +64,5 @@ $$
 \textrm{s.t.} & \quad q\_{k+1} = Aq\_k + Bu\_k
 \end{align*}
 $$
+
+where $p_m$ is the midpoint between feet and $u_{des}$ and $v_{des}$ are the desired foot positions and CoM body frame velocities given by the reference path computations.
