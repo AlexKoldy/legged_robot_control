@@ -1,7 +1,7 @@
 # Whole Body Control
 <div style="display: flex; align-items: center;">
-    <img src="https://github.com/AlexKoldy/whole_body_control/assets/52255127/b92ee60c-a9ff-4868-b9ee-1ad66abe9ab7" height="255" alt="First GIF">
-    <img src="https://github.com/AlexKoldy/whole_body_control/assets/52255127/f3d5e513-711c-46dd-b3d8-7477760e9f7c" height="255" alt="Second GIF">
+    <img src="https://github.com/AlexKoldy/whole_body_control/assets/52255127/b92ee60c-a9ff-4868-b9ee-1ad66abe9ab7" height="235" alt="First GIF">
+    <img src="https://github.com/AlexKoldy/whole_body_control/assets/52255127/f3d5e513-711c-46dd-b3d8-7477760e9f7c" height="235" alt="Second GIF">
 </div>
 
 
