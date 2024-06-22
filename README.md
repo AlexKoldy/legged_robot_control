@@ -66,3 +66,90 @@ $$
 $$
 
 where $p_m$ is the midpoint between feet and $u_{des}$ and $v_{des}$ are the desired foot positions and CoM body frame velocities given by the reference path computations.
+
+## Whole Body Controller
+We represent the dynamics of the robot via 
+
+$$
+M\dot{v}+Cv+G = Bu + J^\top\_h \lambda\_h
+$$
+
+where $M$ is the mass matrix, $Cv$ is the Coriolis term, $G$ is the gravitational force vector, $B$ is the actuation matrix and $J$ is the Jacobian that relates the velocities of the contact points to the velocities of the robot. The state vector is represented by
+
+$$
+x = \begin{bmatrix}
+q \\
+v
+\end{bmatrix}
+$$
+
+where $q$ represents the quaternion orientation of the pelvis link, the position of the CoM and the joint positions, while $v$ represents the angular velocity of the pelvis, the velocity of the CoM and the joint velocities. In the case of our high-frequency whole-body controller, we apply $\hat{x}$, a constant estimate of our state, meaning $x$ itself is not a decision variable in our later optimization. This means that the dynamics become linear with respect to our decision variables $\dot{v}$, $u$ and $\lambda\_h$.
+
+Now, we have some list of tracking objectives for our robot. These include a CoM trajectory, torso angle and foot trajectories. Let's defined $y\_i$ as our task space state for our $i\text{th}$ tracking objective. We can relate the derivative of our task state space to our configuration with
+
+$$
+\begin{align*}
+\dot{y}\_i &= \frac{\partial\_i}{\partial q}\dot{q} = J\_iv  \\
+\ddot{y}\_i &= \dot{J}\_iv + J\dot{v}
+\end{align*}
+$$
+
+
+For each tracking objective, we apply task space PD control, i.e., 
+
+$$
+\ddot{y}\_{cmd, i}=\ddot{y}\_{des, i} + k\_p(y\_{des, i} - y\_i)+k\_d(\dot{y}\_{des, i} - \dot{y}\_i)
+$$
+
+where $\ddot{y}\_{cmd, i}$ will be used as a reference to our whole-body controller and $y\_{des}$ comes from our planned trajectories or objectives, i.e., what we actually want to track. 
+
+Before we formulating the optimization problem, we formulate the contact and friction constraints. First, we want to enforce that the acceleration of the stance foot (or stance feet in double support) via
+
+$$
+\dot{J}\_hv + J\_h\dot{v} = 0
+$$
+
+Next, we build a two-dimensional friction cone as a linear inequality constraint, i.e., we use a linear representation of the friction cone to preserve convexity
+
+$$
+\begin{bmatrix}
+-1 & 0 & -\mu \\
+1 & 0 & -\mu \\
+\end{bmatrix}\lambda\_h \leq \begin{bmatrix} 
+0 \\ 0
+\end{bmatrix}
+$$
+
+where $\mu$ is the friction coefficient. Let's call the matrix on the left hand side $A$ and the vector on the right hand side $b$ such that $A\lambda\_h \leq b$. Given our task state space and our task space command, we formulate the following cost function
+
+$$
+J = \min\_{u, \dot{v}, \lambda\_h} \quad \sum\_{i=0}(\ddot{y}\_i-\ddot{y}\_{cmd, i})^\top W\_i (\ddot{y}\_i-\ddot{y}\_{cmd, i})
+$$
+
+where $W\_i$ is the tracking cost of the $i\text{th}$ tracking objective. Due to $\ddot{y}\_i$ being an affine function of $\dot{v}$, we can represent this cost as a quadratic function of our decision variable $\dot{v}$:
+
+$$
+(\ddot{y}\_i-\ddot{y}\_{cmd, i})^\top W\_i (\ddot{y}\_i-\ddot{y}\_{cmd, i}) = \frac{1}{2}\dot{v}^\top Q\_i \dot{v} + b\_i^\top \dot{v} + c\_i
+$$
+
+where 
+
+$$
+\begin{align*}
+Q\_i &= 2J\_i^\top W\_iJ\_i\\
+b\_i &= -2J\_i^\top W\_i (\ddot{y}\_{cmd, i} - \dot{J}\_iv) \\
+c\_i &= (\ddot{y}\_{cmd, i} - \dot{J}\_iv)^\top W\_i (\ddot{y}\_{cmd, i} - \dot{J}\_iv)
+\end{align*}
+$$
+
+We can finally formulate our whole-body controller optimization problem as a convex quadratic program as follows:
+
+$$
+\begin{align*}
+\min\_{u, \dot{v}, \lambda\_h} & \quad \sum\_{i=0}\frac{1}{2}\dot{v}^\top Q\_i \dot{v} + b\_i^\top \dot{v} + c\_i \\
+\textrm{s.t.} & \quad M\dot{v} + Cv + G = Bu + J\_h^\top \lambda\_h \\
+& \quad \dot{J}\_hv + J\_h\dot{v} = 0 \\
+& \quad A\lambda\_h  \leq b \\
+& \quad u\_{min} \leq u \leq u\_{max}
+\end{align*}
+$$
